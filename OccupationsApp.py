@@ -5,30 +5,35 @@ HW03 -- ...and Now Enjoy its Contents
 2016-09-23
 '''
 
+#IMPORT STATEMENTS#
 from flask import Flask, render_template
 import random
 
 app = Flask(__name__)
 
-occL = open("occupations.csv").read();
-occL = occL.split('\n')
-lineZero = occL[0]
-del occL[0]
-lineLast = occL[len(occL)-1]
+#FILE INPUT#
+occL = open("occupations.csv").read(); #opens and reads the csv
+occL = occL.split('\n') #creates a list that splits it by line
+lineZero = occL[0]+",Test" #stores the last line (we don't want to take any data from that)
+del occL[0] #then deletes it from the list
+lineLast = occL[len(occL)-1]+",100.00" #same for last line
 del occL[len(occL)-1]
 
+#ALGORITHM#
 occDict = {}
 upperBoundL = []
 currentUpperBound = 0
 occL2 = []
 
+#adds all of the occupations and values into the list (list of 3-element lists)
 for line in occL:
-    occL2.append(line.rsplit(",",1))
+    occL2.append([line.rsplit(",",1)[0],line.rsplit(",",1)[1],0]) #[occupation,value,placeholder for test value]
     occS = line.rsplit(",",1)[0]
     currentUpperBound += float(line.rsplit(",",1)[1])
     occDict[currentUpperBound] = occS
     upperBoundL.append(currentUpperBound)
-    
+
+#picks a random occupation by picking a random number and traveling through the list of upper bounds (upperBoundL) until the random number finds an upper bound higher than itself
 def pickOccupation():
     randNum = random.random()*99.8
     passenger = 0
@@ -38,9 +43,41 @@ def pickOccupation():
         if randNum < passenger:
             return line[0]
 
+#TEST FUNCTION THAT SHOWS THAT MY ALGORITHM IS CORRECT SINCE THEY ARE ROUGHLY EQUAL EVERY TIME YOU REFRESH THE PAGE#
+buckets = {} #new dictionary that stores the number of times each occupation is picked
+
+def test():
+  for line in occL2: #creates each bucket, initializes each value to 0
+    buckets[line[0]] = 0
+    
+  for num in range(100000): #runs 100000 times, picks one occupation and adds one to that bucket
+    chosenOne = pickOccupation()
+    buckets[chosenOne] += 1
+
+  returnList = []
+  
+  for line in occL2: #print in order of original so you can compare easily
+    returnList.append(str(buckets[line[0]]/1000.0)) #percentage of that bucket compared to whole thing
+
+  return returnList
+
+
+#ADDS ON THE THIRD COLUMN WITH THE TEST VALUE#
+def appendThirdColumn(oATL):
+  occTestList = test()
+  i = 0
+  while (i < len(occL2)):
+    occL2[i][2] = occTestList[i]
+    oATL.append(occL2[i])
+    i+=1
+
+#ADDS THE FIRST LINE TO THE LIST THAT HAS BOTH THE occupations.csv DATA AND THE TEST DATA, RUNS THE appendThirdColumn() FUNCTION ON IT, ADDS ON THE LAST LINE, THEN RENDERS IT!#
 @app.route("/occupations")
 def occTable():
-    return render_template("occTable.html",occList=occL2,occupation=pickOccupation())
+    occAndTestList = [lineZero.split(",")]
+    appendThirdColumn(occAndTestList)
+    occAndTestList.append(lineLast.split(","))
+    return render_template("occTable.html",occList=occAndTestList,occupation=pickOccupation())
 
 if __name__ == "__main__":
     app.debug = True
