@@ -1,18 +1,14 @@
 '''
 Noah Fichter
-SoftDev1 pd8>
+SoftDev1 pd8
 HW03 -- ...and Now Enjoy its Contents
 2016-09-23
 '''
 
-#IMPORT STATEMENTS#
-from flask import Flask, render_template
 import random
 
-app = Flask(__name__)
-
 #FILE INPUT#
-occL = open("occupations.csv").read(); #opens and reads the csv
+occL = open("csv/occupations.csv").read(); #opens and reads the csv
 occL = occL.split('\n') #creates a list that splits it by line
 lineZero = occL[0]+",Test" #stores the last line (we don't want to take any data from that)
 del occL[0] #then deletes it from the list
@@ -71,14 +67,9 @@ def appendThirdColumn(oATL):
     oATL.append(occL2[i])
     i+=1
 
-#ADDS THE FIRST LINE TO THE LIST THAT HAS BOTH THE occupations.csv DATA AND THE TEST DATA, RUNS THE appendThirdColumn() FUNCTION ON IT, ADDS ON THE LAST LINE, THEN RENDERS IT!#
-@app.route("/occupations")
-def occTable():
+#CREATES THE FINAL LIST TO BE PASSED TO THE APP#
+def finalList():
     occAndTestList = [lineZero.split(",")]
     appendThirdColumn(occAndTestList)
     occAndTestList.append(lineLast.split(","))
-    return render_template("occTable.html",occList=occAndTestList,occupation=pickOccupation())
-
-if __name__ == "__main__":
-    app.debug = True
-    app.run()
+    return occAndTestList
