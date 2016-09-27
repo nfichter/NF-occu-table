@@ -8,7 +8,7 @@ HW03 -- ...and Now Enjoy its Contents
 import random
 
 #FILE INPUT#
-occL = open("csv/occupations.csv").read(); #opens and reads the csv
+occL = open("data/occupations.csv").read(); #opens and reads the csv
 occL = occL.split('\n') #creates a list that splits it by line
 lineZero = occL[0]+",Test" #stores the last line (we don't want to take any data from that)
 del occL[0] #then deletes it from the list
